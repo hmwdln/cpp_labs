@@ -23,23 +23,58 @@ int mygetch()
 
 class Subject
 {
-    public:
+    private:
         char name[100];
         int grades[5];
         int grades_count = 0;
+    public:
+        void setName(char* newName) {
+            strncpy(name, newName, sizeof(name) - 1);
+            name[sizeof(name) - 1] = '\0';
+        }
 
+        void setGrade (int index, int grade) {
+            if (index >= 0 && index <= 5) {
+                grades[index] = grade;
+                if (index >= grades_count) {
+                    grades_count = index + 1;
+                }
+            }
+        }
+
+        void setGradesCount(int count) {
+            if (count >= 0 && count <= 5) {
+                grades_count = count;
+            }
+        }
+
+        const char* getName() 
+        {
+            return name;
+        }
+
+        int getGrade(int index) {
+            if (index >= 0 && index <= grades_count) {
+                return grades[index];
+            }
+            return -1;
+        }
+
+        int getGradesCount() {
+            return grades_count;
+        }
 };
 
 class student_data
 {
-    public:
+    private:
         char* name;
         char* surname;
         char* full_group;
         int exams_marks[3];
         Subject subjects[3];
         int subjects_count = 0;
-
+    public:
         int add_student(int data_size);
         void print_student_data();
         void all_student_data(student_data data[], int data_size);
@@ -52,6 +87,70 @@ class student_data
         void print_subjects();
         void add_grade(int subject_index);
         void add_grade_to_subject();
+
+        const char* getSurname() {
+            return surname;
+        }
+
+        const char* getName() {
+            return name;
+        }
+
+        const char* getFullGroup() {
+            return full_group;
+        }
+
+        int getExamMark(int index) {
+            if (index < 0 || index >= 3)
+                return -1;
+            return exams_marks[index];
+        }
+        
+        int getSubjectsCount() {
+            return subjects_count;
+        }
+
+        const char* getSubjectName(int index) {
+            if (index < 0 || index >= subjects_count)
+                return NULL;
+            return subjects[index].getName();
+        }
+
+        int getSubjectGrade(int subjectIndex, int gradeIndex) {
+            if (subjectIndex < 0 || subjectIndex >= subjects_count)
+                return -1;
+            return subjects[subjectIndex].getGrade(gradeIndex);
+        }
+
+        void setSurname(char* newSurname) {
+            surname = new char[strlen(newSurname) + 1];
+            strcpy(surname, newSurname);
+        }
+
+        void setName(char* newName) {
+            name = new char[strlen(newName) + 1];
+            strcpy(name, newName);
+        }
+
+        void setFullGroup(char* newGroup) {
+            full_group = new char[strlen(newGroup) + 1];
+            strcpy(full_group, newGroup);
+        }
+
+        void setMark(int index, int mark) {
+            if (index >= 0 && index <= 3) {
+                exams_marks[index] = mark;
+            }
+        }
+
+        void setSubjectName(int index, char* name) {
+            subjects[index].setName(name);
+        }
+
+        void setSubjectGrade(int subjectIndex, int gradeIndex, int grade) {
+            subjects[subjectIndex].setGrade(gradeIndex, grade);
+        }
+
 };
 
 bool is_valid_group(const string &group)
@@ -73,27 +172,27 @@ int student_data::add_student(int data_size)
     cin.getline(temp_name, 100);
 
     bool valid_group = false;
-    while (!valid_group) 
-    {
+    while (!valid_group) {
         cout << "Группа (формат XXX-YY): ";
         cin.getline(temp_group, 100);
-        if (is_valid_group(temp_group))
+        if (is_valid_group(temp_group)) {
             valid_group = true;
-        else 
+        } else {
             cout << "Неправильный формат группы. Введите снова.\n";
+        }
     }
 
     bool valid_marks = false;
-    while (!valid_marks) 
-    {
+    while (!valid_marks) {
         cout << "Оценки по трём экзаменам (от 1 до 5, через пробел): ";
         cin >> exams_marks[0] >> exams_marks[1] >> exams_marks[2];
         if ((exams_marks[0] >= 1 && exams_marks[0] <= 5) &&
             (exams_marks[1] >= 1 && exams_marks[1] <= 5) &&
-            (exams_marks[2] >= 1 && exams_marks[2] <= 5)) 
-                valid_marks = true;
-        else
+            (exams_marks[2] >= 1 && exams_marks[2] <= 5)) {
+            valid_marks = true;
+        } else {
             cout << "Оценки должны быть целыми числами от 1 до 5. Попробуйте снова.\n";
+        }
     }
 
     surname = temp_surname;
@@ -178,21 +277,30 @@ int student_data::load(student_data data[])
         name[strlen(name) - 1] = '\0';
         group[strlen(group) - 1] = '\0';
 
-        data[i].surname = surname;
-        data[i].name = name;
-        data[i].full_group = group;
+        data[i].setSurname(surname);
+        data[i].setName(name);
+        data[i].setFullGroup(group);
+
         for (int j = 0; j < 3; j++)
             data[i].exams_marks[j] = exams_marks[j];
 
         fscanf(file, "%d\n", &data[i].subjects_count);
         for (int j = 0; j < data[i].subjects_count; j++)
         {
-            fgets(data[i].subjects[j].name, 100, file);
-            data[i].subjects[j].name[strlen(data[i].subjects[j].name) - 1] = '\0';
-            fscanf(file, "%d\n", &data[i].subjects[j].grades_count);
-            for (int k = 0; k < data[i].subjects[j].grades_count; k++)
+            char subject_name[100];
+            fgets(subject_name, 100, file);
+            subject_name[strlen(subject_name) - 1] = '\0';
+            data[i].subjects[j].setName(subject_name);
+
+            int grades_count;
+            fscanf(file, "%d\n", &grades_count);
+            // data[i].subjects[j].setGradesCount(grades_count);
+            // data[i].subjects[j].getGradesCount() из цикла ниже
+            for (int k = 0; k < grades_count; k++)
             {
-                fscanf(file, "%d ", &data[i].subjects[j].grades[k]);
+                int grade;
+                fscanf(file, "%d ", &grade);
+                data[i].subjects[j].setGrade(k, grade);
             }
         }
     }
@@ -208,16 +316,16 @@ void student_data::save(student_data data[], int size)
     for (int i = 0; i < size; i++)
     {
         fprintf(file, "%s\n%s\n%s\n%d %d %d\n",
-                data[i].surname, data[i].name, data[i].full_group,
-                data[i].exams_marks[0], data[i].exams_marks[1], data[i].exams_marks[2]);
+                data[i].getSurname(), data[i].getName(), data[i].getFullGroup(),
+                data[i].getExamMark(0), data[i].getExamMark(1), data[i].getExamMark(2));
 
-        fprintf(file, "%d\n", data[i].subjects_count);
-        for (int j = 0; j < data[i].subjects_count; j++)
+        fprintf(file, "%d\n", data[i].getSubjectsCount());
+        for (int j = 0; j < data[i].getSubjectsCount(); j++)
         {
-            fprintf(file, "%s\n%d\n", data[i].subjects[j].name, data[i].subjects[j].grades_count);
-            for (int k = 0; k < data[i].subjects[j].grades_count; k++)
+            fprintf(file, "%s\n%d\n", data[i].subjects[j].getName(), data[i].subjects[j].getGradesCount());
+            for (int k = 0; k < data[i].subjects[j].getGradesCount(); k++)
             {
-                fprintf(file, "%d ", data[i].subjects[j].grades[k]);
+                fprintf(file, "%d ", data[i].subjects[j].getGrade(k));
             }
             fprintf(file, "\n");
         }
@@ -227,8 +335,7 @@ void student_data::save(student_data data[], int size)
 
 void student_data::add_subject()
 {
-    if (subjects_count >= 3) 
-    {
+    if (subjects_count >= 3) {
         cout << "У студента уже 3 предмета, нельзя добавить больше.\n";
         return;
     }
@@ -238,36 +345,32 @@ void student_data::add_subject()
     cin.ignore();
     cin.getline(new_subject, 100);
     
-    for (int i = 0; i < subjects_count; i++) 
-    {
-        if (strcmp(subjects[i].name, new_subject) == 0) 
-        {
+    for (int i = 0; i < subjects_count; i++) {
+        if (strcmp(subjects[i].getName(), new_subject) == 0) {
             cout << "Предмет '" << new_subject << "' уже добавлен студенту.\n";
             return;
         }
     }
 
-    strcpy(subjects[subjects_count].name, new_subject);
+    subjects[subjects_count].setName(new_subject);
+    subjects[subjects_count].setGradesCount(0);
     subjects_count++;
 }
 
 // student_data* student
 void student_data::print_subjects()
 {
-    if (subjects_count == 0) 
-    {
+    if (subjects_count == 0) {
         cout << "У студента нет добавленных предметов.\n";
         return;
     }
 
     cout << "Предметы студента:\n";
-    for (int i = 0; i < subjects_count; i++) 
-    {
-        cout << subjects[i].name << " (Оценки: ";
-        for (int j = 0; j < subjects[i].grades_count; j++) 
-        {
-            cout << subjects[i].grades[j];
-            if (j < subjects[i].grades_count - 1)
+    for (int i = 0; i < subjects_count; i++) {
+        cout << subjects[i].getName() << " (Оценки: ";
+        for (int j = 0; j < subjects[i].getGradesCount(); j++) {
+            cout << subjects[i].getGrade(j);
+            if (j < subjects[i].getGradesCount() - 1)
                 cout << ", ";
         }
         cout << ")\n";
@@ -276,8 +379,7 @@ void student_data::print_subjects()
 
 void student_data::add_grade(int subject_index)
 {
-    if (subjects[subject_index].grades_count >= 5) 
-    {
+    if (subjects[subject_index].getGradesCount() >= 5) {
         cout << "Нельзя добавить больше оценок для этого предмета.\n";
         return;
     }
@@ -286,136 +388,103 @@ void student_data::add_grade(int subject_index)
     cout << "Введите оценку (от 1 до 5): ";
     cin >> grade;
 
-    if (grade < 1 || grade > 5) 
-    {
+    if (grade < 1 || grade > 5) {
         cout << "Оценка должна быть от 1 до 5. Попробуйте снова.\n";
         return;
     }
 
-    subjects[subject_index].grades[subjects[subject_index].grades_count] = grade;
-    subjects[subject_index].grades_count++;
+    subjects[subject_index].setGrade(subjects[subject_index].getGradesCount(), grade);
+    subjects[subject_index].setGradesCount(subjects[subject_index].getGradesCount() + 1);
 }
 
 void student_data::add_grade_to_subject()
 {
-    if (subjects_count == 0) 
-    {
+    if (subjects_count == 0) {
         cout << "У студента нет добавленных предметов.\n";
         return;
     }
 
     cout << "Введите номер предмета, куда хотите добавить оценку:\n";
-    for (int i = 0; i < subjects_count; i++) 
-        cout << i << " - " << subjects[i].name << "\n";
+    for (int i = 0; i < subjects_count; i++) {
+        cout << i << " - " << subjects[i].getName() << "\n";
+    }
 
     int subject_index;
     cin >> subject_index;
 
-    if (subject_index >= 0 && subject_index < subjects_count) 
+    if (subject_index >= 0 && subject_index < subjects_count) {
         add_grade(subject_index);
-    else
+    } else {
         cout << "Неверный номер предмета.\n";
+    }
 }
 
-int main() 
+int main()
 {
     student_data data[100];
     int data_size = student_data::load(data);
-    int removed, changed;
-    char choice;
-
-    do {
-        cout << "[1] - добавить студента\n";
-        cout << "[2] - вывести отличников\n";
-        cout << "[3] - удалить студента\n";
-        cout << "[4] - редактировать студента\n";
-        cout << "[5] - вывести всех студентов\n";
-        cout << "[6] - добавить предмет студенту\n";
-        cout << "[7] - показать предметы студента\n";
-        cout << "[8] - добавить оценку предмету студента\n";
-        cout << "[q] - сохранить и выйти\n";
-        cout << "Ваш выбор: ";
-        cin >> choice;
-
-        switch (choice) 
+    int changed, removed;
+    while (true)
+    {
+        cout << "\n[1] - добавить студента\n"
+                  "[2] - вывести отличников\n"
+                  "[3] - удалить студента\n"
+                  "[4] - редактировать студента\n"
+                  "[5] - вывести всех студентов\n"
+                  "[6] - добавить предмет студенту\n"
+                  "[7] - показать предметы студента\n"
+                  "[8] - добавить оценку предмету студента\n"
+                  "[q] - сохранить и выйти\n";
+        char choice = mygetch();
+        switch (choice)
         {
             case '1':
                 data_size = data[data_size].add_student(data_size);
                 break;
-
             case '2':
                 data[0].excellent_marks(data, data_size);
                 break;
-
             case '3':
                 data[0].all_student_data(data, data_size);
                 cout << "Номер студента для удаления: ";
                 cin >> removed;
-                if (removed < data_size && removed >= 0) {
+                if (removed < data_size && removed >= 0)
                     data_size = data[removed].remove_student(data_size);
-                } else {
-                    cout << "Некорректный номер студента!\n";
-                }
                 break;
-
             case '4':
                 data[0].all_student_data(data, data_size);
                 cout << "Номер студента для редактирования: ";
                 cin >> changed;
-                if (changed < data_size && changed >= 0) {
+                if (changed < data_size && changed >= 0)
                     data[changed].change_student();
-                } else {
-                    cout << "Некорректный номер студента!\n";
-                }
                 break;
-
             case '5':
                 data[0].all_student_data(data, data_size);
                 break;
-
             case '6':
                 data[0].all_student_data(data, data_size);
                 cout << "Номер студента, которому добавляем предмет: ";
                 cin >> changed;
-                if (changed < data_size && changed >= 0) {
-                    data[changed].add_subject();
-                } else {
-                    cout << "Некорректный номер студента!\n";
-                }
+                if (changed < data_size && changed >= 0)
+                    data[data_size].add_subject();
                 break;
-
             case '7':
                 data[0].all_student_data(data, data_size);
                 cout << "Номер студента: ";
                 cin >> changed;
-                if (changed < data_size && changed >= 0) {
-                    data[changed].print_subjects();
-                } else {
-                    cout << "Некорректный номер студента!\n";
-                }
+                if (changed < data_size && changed >= 0)
+                    data[changed].add_grade_to_subject();
                 break;
-
             case '8':
                 data[0].all_student_data(data, data_size);
                 cout << "Номер студента: ";
                 cin >> changed;
-                if (changed < data_size && changed >= 0) {
-                    data[changed].add_grade_to_subject();
-                } else {
-                    cout << "Некорректный номер студента!\n";
-                }
+                if (changed < data_size && changed >= 0)
+                    data[changed].print_subjects();
                 break;
-
             case 'q':
-                data[0].save(data, data_size);
+                student_data::save(data, data_size);
                 return 0;
-
-            default:
-                cout << "Некорректный выбор, попробуйте снова.\n";
-                break;
         }
-    } while (choice != 'q');
-
-    return 0;
+    }
 }
-
