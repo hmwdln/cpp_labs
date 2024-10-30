@@ -28,6 +28,10 @@ class Subject
         int grades[5];
         int grades_count;
     public:
+        Subject() : grades_count(0)
+        {
+
+        };
         void setName(char* newName) {
             strncpy(name, newName, sizeof(name) - 1);
             name[sizeof(name) - 1] = '\0';
@@ -75,6 +79,11 @@ class student_data
         Subject subjects[3];
         int subjects_count;
     public:
+        student_data() : subjects_count(0)
+        {
+
+        };
+
         int add_student(int data_size);
         void print_student_data();
         void all_student_data(student_data data[], int data_size);
