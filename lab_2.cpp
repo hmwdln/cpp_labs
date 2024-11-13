@@ -84,25 +84,14 @@ class student_data
             name = new char[100];
             surname = new char[100];
             full_group = new char[100];
-
-            // даем первоначальные значения
-            strcpy(surname, "Иванов");
-            strcpy(name, "Иван");
-            strcpy(full_group, "606-22");
-            
-            // предметов нет - ставим 0
-            subjects_count = 0;
         };
-        student_data()
+        student_data(char *name_u, char *surname_u, char *full_group_u)
         {
-            name = new char[100];
-            surname = new char[100];
-            full_group = new char[100];
-            
+            student_data();
             // даем первоначальные значения
-            strcpy(surname, "Иванов");
-            strcpy(name, "Иван");
-            strcpy(full_group, "606-22");
+            strcpy(surname, surname_u);
+            strcpy(name, name_u);
+            strcpy(full_group, full_group_u);
             
             // проставляем оценки по умолчанию
             exams_marks[0] = 5;  // первый экзамен
@@ -110,30 +99,23 @@ class student_data
             exams_marks[2] = 5;  // третий экзамен
 
             // предметов нет - ставим 0
-            subjects_count = 0;
-        }
-        student_data()
-        {
-            name = new char[100];
-            surname = new char[100];
-            full_group = new char[100];
-            
-            // даем первоначальные значения
-            strcpy(surname, "Иванов");
-            strcpy(name, "Иван");
-            strcpy(full_group, "606-22");
-            
-            // проставляем оценки по умолчанию
-            exams_marks[0] = 5;  // первый экзамен 
-            exams_marks[1] = 4;  // второй экзамен
-            exams_marks[2] = 5;  // третий экзамен
-            
-            // даем название предметам
-            subjects[0].setName("Физика");
-            subjects[1].setName("Математика");
-            
-            // указываем, что предмета два 
             subjects_count = 2;
+        }
+        student_data(char *name_u, char *surname_u, char *full_group_u, int *exams_marks_u, Subject *subjects_u, int subjects_count_u)
+        {
+            student_data(name_u, surname_u, full_group_u);
+            
+            for (int i = 0; i < 3; ++i) {
+                exams_marks[i] = exams_marks_u[i];
+            }
+
+            // записываем предметы
+            for (int i = 0; i < subjects_count_u; ++i) {
+                subjects[i] = subjects_u[i];  
+            }
+
+            // записываем кол-во предметов
+            subjects_count = subjects_count_u;
         }
 
         int add_student(int data_size);
